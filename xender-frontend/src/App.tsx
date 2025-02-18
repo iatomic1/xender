@@ -16,7 +16,7 @@ function App() {
           rel="noopener noreferrer nofollow"
           target="_blank"
         >
-          <Badge variant="outline">shadcn/ui</Badge>
+          <Badge variant="outline">Hi</Badge>
         </a>
         <CountBtn />
       </div>
