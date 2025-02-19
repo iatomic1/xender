@@ -1,14 +1,13 @@
+import "../../assets/main.css";
 import { useEffect, useState } from "react";
 import { Toaster } from "@/components/ui/sonner";
-import "./App.module.css";
-import "../../assets/main.css";
 import { useTheme } from "@/components/theme-provider.tsx";
 import { Button } from "@/components/ui/button";
 import { UserData } from "@stacks/connect";
 import { toast } from "sonner";
 import { Unplug, Wallet2 } from "lucide-react";
 import { getAccountBalance } from "../queries/balance";
-import TweetButtonInjector from "./tweet-button-injector";
+import TweetButtonInjector from "./_components/tweet-button-injector";
 
 export default () => {
   const { theme, toggleTheme } = useTheme();

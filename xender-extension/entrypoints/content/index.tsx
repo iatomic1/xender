@@ -4,6 +4,7 @@ import App from "./App.tsx";
 import { i18nConfig } from "@/components/i18nConfig.ts";
 import initTranslations from "@/components/i18n.ts";
 import { ThemeProvider } from "@/components/theme-provider.tsx";
+import { ContentRoot } from "@/context/PortalTargetContext.tsx";
 
 export default defineContentScript({
   matches: ["*://*/*"],
@@ -14,11 +15,13 @@ export default defineContentScript({
       name: "language-learning-content-box",
       position: "inline",
       onMount: (container) => {
-        console.log(container);
+        const app = document.createElement("div");
+        app.id = "command-palette-root";
+        container.append(app);
         const root = ReactDOM.createRoot(container);
         root.render(
           <ThemeProvider>
-            <App />
+            <ContentRoot />
           </ThemeProvider>,
         );
         return root;

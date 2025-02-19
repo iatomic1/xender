@@ -1,7 +1,6 @@
 {
   "name": "xender",
   "module": "index.ts",
-  "type": "module",
   "devDependencies": {
     "@types/bun": "latest",
     "husky": "^9.1.7"
@@ -9,13 +8,14 @@
   "peerDependencies": {
     "typescript": "^5.0.0"
   },
+  "lint-staged": {
+    "**/*.{ts,tsx}": "bun lint"
+  },
   "scripts": {
     "lint": "cd xender-frontend/ && bun lint",
     "check-types": "cd xender-frontend/ && bunx tsc --noEmit",
     "dev": "cd xender-frontend/ && bun dev",
     "prepare": "husky"
   },
-  "lint-staged": {
-    "**/*.{ts,tsx}": "bun lint"
-  }
+  "type": "module"
 }

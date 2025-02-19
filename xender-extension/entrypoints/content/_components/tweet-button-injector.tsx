@@ -2,6 +2,7 @@ import { Button } from "@/components/ui/button";
 import { Bitcoin } from "lucide-react";
 import { useEffect, useState, useRef } from "react";
 import ReactDOM from "react-dom";
+import TipBtn from "./tip-button";
 
 interface TweetInfo {
   element: Element;
@@ -118,17 +119,14 @@ const TweetButtonInjector = ({
           const tweetActions = tweet.querySelector('[role="group"]');
           if (tweetActions && !tweetActions.querySelector(".injected-button")) {
             return ReactDOM.createPortal(
-              <Button type="button" size={"icon"}>
-                {<Bitcoin size={17} strokeWidth={1.25} />}
-              </Button>,
-              // <TipBtn
-              //   key={index}
-              //   username={tweetInfo.username}
-              //   balance={balance}
-              //   connectedStxAddr={stxAddr}
-              //   receiverXUsername={tweetInfo.receiverXUsername}
-              //   senderXUsername="iatomic_1"
-              // />,
+              <TipBtn
+                key={index}
+                username={tweetInfo.username}
+                balance={balance}
+                connectedStxAddr={stxAddr}
+                receiverXUsername={tweetInfo.receiverXUsername}
+                senderXUsername="iatomic_1"
+              />,
               tweetActions,
             );
           }
