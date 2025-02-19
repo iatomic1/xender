@@ -1,1 +1,1 @@
-bunx lint-staged
+cd xender-frontend/ && bun lint

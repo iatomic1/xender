@@ -12,6 +12,7 @@
   "scripts": {
     "lint": "cd xender-frontend/ && bun lint",
     "check-types": "cd xender-frontend/ && bunx tsc --noEmit",
+    "dev": "cd xender-frontend/ && bun dev",
     "prepare": "husky"
   },
   "lint-staged": {
