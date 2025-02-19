@@ -1,0 +1,44 @@
+{
+  "manifest_version": 3,
+  "name": "Xender",
+  "version": "1.0.0",
+  "description": "Xender is a Chrome Extension for tipping",
+  "permissions": ["scripting", "activeTab", "storage"],
+  "host_permissions": [
+    "https://x.com/*",
+    "http://localhost:3000/*",
+    "https://discord.com/*"
+  ],
+  "background": {
+    "service_worker": "src/background.ts",
+    "type": "module"
+  },
+  "externally_connectable": {
+    "matches": [
+      "https://x.com/*",
+      "http://localhost:3000/*",
+      "https://discord.com/*"
+    ]
+  },
+  "content_security_policy": {
+    "extension_pages": "script-src 'self'; object-src 'self'"
+  },
+  "content_scripts": [
+    {
+      "matches": ["https://x.com/*", "https://discord.com/*"],
+      "js": ["src/content.tsx"]
+    }
+  ],
+  "web_accessible_resources": [
+    {
+      "resources": [
+        "src/scripts/polyfill.ts",
+        "src/scripts/localstorage.ts",
+        "src/scripts/session.ts",
+        "src/scripts/connect.ts",
+        "src/scripts/transactions.ts"
+      ],
+      "matches": ["https://x.com/*", "https://discord.com/*"]
+    }
+  ]
+}
