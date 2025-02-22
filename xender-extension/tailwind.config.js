@@ -29,7 +29,6 @@ module.exports = {
   content: [
     "./entrypoints/**/*.{html,ts,tsx}",
     "./components/**/*.{html,ts,tsx}",
-    "./_components/**/*.{html,ts,tsx}",
   ],
   prefix: "",
   theme: {
