@@ -1,8 +1,8 @@
-import { Button } from "@/components/ui/button";
-import { Bitcoin } from "lucide-react";
+// tweet-injector.tsx
+import TipBtn from "@/components/tip-button";
 import { useEffect, useState, useRef } from "react";
 import ReactDOM from "react-dom";
-import TipBtn from "./tip-button";
+import { ShadowRootPortal } from "./shadow-portal";
 
 interface TweetInfo {
   element: Element;

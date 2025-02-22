@@ -1,5 +1,5 @@
+import "../assets/main.css";
 import { getOwner } from "bns-v2-sdk";
-import type React from "react";
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import {
@@ -9,9 +9,9 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from "~/components/ui/dialog";
+} from "@/components/ui/dialog";
 import { Bitcoin } from "lucide-react";
-import StxSbtcForm from "./stx-sbtc-form";
+import XendForm from "@/entrypoints/content/_components/xend-form";
 
 interface MiniButtonProps
   extends React.ButtonHTMLAttributes<HTMLButtonElement> {
@@ -34,7 +34,7 @@ const TipBtn: React.FC<MiniButtonProps> = ({
   const [isLoading, setIsLoading] = useState(false);
   const [open, setOpen] = useState(false);
   const [isApiCallComplete, setIsApiCallComplete] = useState(false);
-  const [receiverStxAddr, setReceiverStxAddr] = useState<string | null>();
+  const [receiverStxAddr, setReceiverStxAddr] = useState<string | null>("");
 
   useEffect(() => {
     const fetchBnsName = async () => {
@@ -70,8 +70,8 @@ const TipBtn: React.FC<MiniButtonProps> = ({
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button type="button" {...props} size={"icon"} variant={"outline"}>
-          {children || <Bitcoin />}
+        <Button size={"lg"} variant={"outline"}>
+          {children || <Bitcoin size={17} strokeWidth={1.25} />}
         </Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-[425px]">
@@ -86,11 +86,20 @@ const TipBtn: React.FC<MiniButtonProps> = ({
           </DialogDescription>
         </DialogHeader>
         {isApiCallComplete && receiverStxAddr ? (
-          <p>Done</p>
+          <XendForm
+            isApiCallComplete={isApiCallComplete}
+            receiverStxAddr={receiverStxAddr}
+            username={username as string}
+            setOpen={setOpen}
+            senderAddy={connectedStxAddr}
+            balance={balance}
+            receiverXUsername={receiverXUsername}
+            senderXUsername={senderXUsername}
+          />
         ) : (
           <div className="text-center py-4">
-            {isApiCallComplete && receiverStxAddr
-              ? "No BNS address found for this user. Unable to send tip."
+            {isApiCallComplete && !receiverStxAddr
+              ? "No BNS address found for this user. Unable to xend tip."
               : "Loading..."}
           </div>
         )}
