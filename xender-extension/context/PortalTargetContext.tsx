@@ -3,7 +3,6 @@ import { Button } from "@/components/ui/button";
 import App from "@/entrypoints/content/App";
 import React, { useState } from "react";
 import { useTheme } from "@/components/theme-provider.tsx";
-import { Toaster } from "@/components/ui/sonner";
 import { toast } from "sonner";
 
 export const PortalContext = React.createContext<HTMLElement | null>(null);
@@ -26,7 +25,7 @@ export const ContentRoot = () => {
             onClick={() => {
               toast.success("Hello");
             }}
-            className="top-4 right-4 fixed z-[999999999999999999999]"
+            className="top-4 left-4 fixed z-[999999999999999999999]"
           >
             me orewa
           </Button>

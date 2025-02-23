@@ -23,6 +23,7 @@
     "@radix-ui/react-select": "^2.1.6",
     "@radix-ui/react-slot": "^1.1.2",
     "@radix-ui/react-tooltip": "^1.0.7",
+    "@radix-ui/react-visually-hidden": "^1.1.2",
     "@stacks/connect": "7.10.1",
     "@stacks/transactions": "^7.0.4",
     "@thedutchcoder/postcss-rem-to-px": "^0.0.2",

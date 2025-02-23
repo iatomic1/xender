@@ -1,4 +1,5 @@
 import "../assets/main.css";
+import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
 import { getOwner } from "bns-v2-sdk";
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
@@ -46,7 +47,7 @@ const TipBtn: React.FC<MiniButtonProps> = ({
         });
         setReceiverStxAddr(owner);
       } catch (error) {
-        console.error("Error fetching BNS details or balance:", error);
+        // console.error("Error fetching BNS details or balance:", error);
       } finally {
         setIsLoading(false);
         setIsApiCallComplete(true);
@@ -76,7 +77,9 @@ const TipBtn: React.FC<MiniButtonProps> = ({
       </DialogTrigger>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
-          <DialogTitle>Xend {username}</DialogTitle>
+          <VisuallyHidden>
+            <DialogTitle>Xend {username}</DialogTitle>
+          </VisuallyHidden>
           <DialogDescription>
             {isLoading
               ? "Loading address..."
