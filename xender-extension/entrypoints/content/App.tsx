@@ -1,12 +1,14 @@
 import { useEffect, useState } from "react";
-import { Toaster } from "@/components/ui/sonner";
-import { Button } from "@/components/ui/button";
 import { UserData } from "@stacks/connect";
 import { toast } from "sonner";
-import { Unplug, Wallet2 } from "lucide-react";
 import { getAccountBalance } from "../queries/balance";
 import TweetButtonInjector from "./_components/tweet-button-injector";
 import { websiteMessenger } from "@/lib/window-messaging";
+import { createPortal } from "react-dom";
+import LeaderboardSheet from "./_components/leaderboard-sheet";
+import Auth from "./_components/auth";
+import LeaderboardMount from "./_components/leaderboard-mount";
+import X from "./_components/x";
 
 export default () => {
   const [hostname, setHostname] = useState("");
@@ -65,32 +67,14 @@ export default () => {
   return (
     <div>
       {hostname === "x.com" && (
-        <TweetButtonInjector
-          stxAddr={address as string}
+        <X
+          isSignedIn={isSignedIn}
           balance={balance}
-          isSignedId={isSignedIn}
+          address={address as string}
         />
       )}
-      <Button
-        size={"lg"}
-        variant={"outline"}
-        className="fixed top-1 right-3 z-[99] gap-3"
-        onClick={async () => {
-          if (isSignedIn) {
-            websiteMessenger.sendMessage("disconnectWallet", null);
-          } else {
-            websiteMessenger.sendMessage("connectWallet", null);
-            // window.postMessage({ type: "CONNECT_WALLET" }, "*");
-          }
-        }}
-      >
-        {isSignedIn && userData ? (
-          <Unplug strokeWidth={1.25} size={17} />
-        ) : (
-          <Wallet2 strokeWidth={1.25} size={17} />
-        )}
-        {isSignedIn ? "Disconnect" : "Connect Xender"}
-      </Button>
+
+      <Auth isSignedIn={isSignedIn} userData={userData} />
     </div>
   );
 };
