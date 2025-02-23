@@ -1,7 +1,20 @@
+import { SUPPORTED_TOKENS } from "@/lib/constants";
 import { websiteMessenger } from "@/lib/window-messaging";
-import { openSTXTransfer, showConnect } from "@stacks/connect";
+import {
+  openContractCall,
+  openSTXTransfer,
+  showConnect,
+} from "@stacks/connect";
 import { AppConfig, UserSession } from "@stacks/connect";
-import { number } from "zod";
+import {
+  someCV,
+  bufferCV,
+  noneCV,
+  Pc,
+  uintCV,
+  principalCV,
+  PostConditionMode,
+} from "@stacks/transactions";
 
 const appConfig = new AppConfig(["store_write", "publish_data"]);
 const userSession = new UserSession({ appConfig });
@@ -91,8 +104,6 @@ export default defineUnlistedScript(async () => {
             icon: "/icon.png",
           },
           onFinish: (data) => {
-            console.log("Transaction ID:", data.txId);
-            console.log("Raw transaction:", data.txRaw);
             resolve({
               txId: data.txId,
               address,
@@ -110,7 +121,55 @@ export default defineUnlistedScript(async () => {
         });
       });
 
-      // Wait for the promise to resolve or reject
+      try {
+        const result = await transactionPromise;
+        return result;
+      } catch (error) {
+        console.error("Transaction failed:", error);
+        throw error;
+      }
+    } else {
+      const txOptions = await constructTxOptions(
+        Number(amount),
+        address,
+        `XENDER for ${username}`,
+        {
+          contract:
+            currency === "MEME"
+              ? SUPPORTED_TOKENS.MEME
+              : SUPPORTED_TOKENS.VELAR,
+          decimals: 6,
+          ticker: currency === "MEME" ? "MEME" : "VELAR",
+        },
+        senderAddy,
+      );
+
+      const transactionPromise = new Promise((resolve, reject) => {
+        openContractCall({
+          userSession,
+          ...txOptions,
+          appDetails: {
+            name: "Xender",
+            icon: "/icon.png",
+          },
+          onFinish: (data) => {
+            resolve({
+              txId: data.txId,
+              address,
+              amount,
+              currency,
+              username,
+              senderAddy,
+              senderXProfile,
+              receiverXProfile,
+            });
+          },
+          onCancel: () => {
+            reject(new Error("Transaction cancelled by user"));
+          },
+        });
+      });
+
       try {
         const result = await transactionPromise;
         return result;
@@ -121,3 +180,68 @@ export default defineUnlistedScript(async () => {
     }
   });
 });
+
+const constructTxOptions = async (
+  amount: number,
+  receiverAddr: string,
+  memo: string,
+  tokenConfig: {
+    decimals: number;
+    contract: string;
+    ticker: string;
+  },
+  senderAddy: string,
+) => {
+  if (!tokenConfig?.contract || !tokenConfig.contract.includes(".")) {
+    console.log(
+      "Invalid contract format. Expected 'contractAddress.contractName'",
+    );
+    throw new Error(
+      "Invalid contract format. Expected 'contractAddress.contractName'",
+    );
+  }
+
+  let memoCV;
+  if (memo) {
+    let memoBuffer = new TextEncoder().encode(memo);
+
+    if (memoBuffer.length > 34) {
+      memoBuffer = memoBuffer.slice(0, 34);
+    } else if (memoBuffer.length < 34) {
+      const padding = new Uint8Array(34 - memoBuffer.length).fill(0);
+      memoBuffer = new Uint8Array([...memoBuffer, ...padding]);
+    }
+
+    memoCV = someCV(bufferCV(memoBuffer));
+  } else {
+    memoCV = noneCV();
+  }
+
+  const decimal = tokenConfig?.decimals ? tokenConfig.decimals : 6;
+  // Ensure uintAmt is an integer by using Math.round instead of Math.floor
+  const uintAmt = Math.round(amount * 10 ** decimal);
+
+  const contract = tokenConfig.contract.split(".");
+
+  const txOptions = {
+    contractAddress: contract[0],
+    contractName: contract[1],
+    functionName: "transfer",
+    postConditions: [
+      Pc.principal(senderAddy)
+        .willSendEq(uintAmt)
+        .ft(`${contract[0]}.${contract[1]}`, tokenConfig.ticker),
+    ],
+    functionArgs: [
+      uintCV(uintAmt.toString()),
+      principalCV(senderAddy),
+      principalCV(receiverAddr),
+      memoCV,
+    ],
+    postConditionMode: PostConditionMode.Deny,
+    validateWithAbi: true,
+    network: "mainnet" as const,
+  };
+
+  return txOptions;
+};
