@@ -1,9 +1,7 @@
 import "../assets/main.css";
-import { Button } from "@/components/ui/button";
 import App from "@/entrypoints/content/App";
 import React, { useState } from "react";
 import { useTheme } from "@/components/theme-provider.tsx";
-import { toast } from "sonner";
 
 export const PortalContext = React.createContext<HTMLElement | null>(null);
 
@@ -21,14 +19,14 @@ export const ContentRoot = () => {
           id="command-portal-container"
           className={theme}
         >
-          <Button
-            onClick={() => {
-              toast.success("Hello");
-            }}
-            className="top-4 left-4 fixed z-[999999999999999999999]"
-          >
-            me orewa
-          </Button>
+          {/* <Button */}
+          {/*   onClick={() => { */}
+          {/*     toast.success("Hello"); */}
+          {/*   }} */}
+          {/*   className="top-4 left-4 fixed z-[999999999999999999999]" */}
+          {/* > */}
+          {/*   me orewa */}
+          {/* </Button> */}
           <App />
         </div>
       </PortalContext.Provider>

@@ -71,15 +71,13 @@ const TipBtn: React.FC<MiniButtonProps> = ({
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button size={"lg"} variant={"outline"}>
+        <Button size={"icon"}>
           {children || <Bitcoin size={17} strokeWidth={1.25} />}
         </Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-[425px]">
+        <DialogTitle>Xend {username}</DialogTitle>
         <DialogHeader>
-          <VisuallyHidden>
-            <DialogTitle>Xend {username}</DialogTitle>
-          </VisuallyHidden>
           <DialogDescription>
             {isLoading
               ? "Loading address..."

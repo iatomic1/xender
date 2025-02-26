@@ -73,7 +73,6 @@ export default () => {
           address={address as string}
         />
       )}
-
       <Auth isSignedIn={isSignedIn} userData={userData} />
     </div>
   );
