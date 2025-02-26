@@ -196,10 +196,10 @@ export default function XendForm({
         const txId = res.txId;
 
         if (txId && txId !== "") {
-          toast.success(
+          toast.info(
             `Xent ${Number.parseFloat(values.amount)} ${values.currency} successfully to ${username}`,
             {
-              richColors: false,
+              richColors: true,
               description: `Transaction ID: ${truncateStr(txId as string)}`,
               duration: 5000,
               action: {
@@ -316,7 +316,7 @@ export default function XendForm({
             {isLoading && (
               <Loader className={"animate-spin"} size={17} strokeWidth={1.25} />
             )}
-            Send Tip
+            Xend Tip
           </Button>
         </DialogFooter>
       </form>

@@ -13,6 +13,7 @@ import { Badge } from "@/components/ui/badge";
 import { SquareKanban } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { API_BASE_URL } from "@/lib/constants";
+import axios from "axios";
 
 type Leaderboard = {
   user: {
@@ -49,9 +50,10 @@ const LeaderboardSheet = () => {
         setIsLoading(true);
         setError(null);
         try {
-          const response = await fetch(`${API_BASE_URL}leaderboard`);
-          if (!response.ok) throw new Error("Failed to fetch leaderboard");
-          const data: LeaderboardResponse = await response.json();
+          const response = await axios.get(`${API_BASE_URL}leaderboard`);
+          console.log(response);
+          if (!response.data) throw new Error("Failed to fetch leaderboard");
+          const data: LeaderboardResponse = await response.data;
           setLeaderboard(data.leaderboard);
         } catch (err) {
           setError(

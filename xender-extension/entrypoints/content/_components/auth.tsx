@@ -13,7 +13,7 @@ export default function Auth({
     <Button
       size={"lg"}
       variant={"outline"}
-      className="fixed top-1 right-3 z-[99] gap-3"
+      className="fixed top-1 right-3 gap-3"
       onClick={async () => {
         if (isSignedIn) {
           websiteMessenger.sendMessage("disconnectWallet", null);

@@ -2,7 +2,8 @@
 import TipBtn from "@/components/tip-button";
 import { useEffect, useState, useRef } from "react";
 import ReactDOM from "react-dom";
-import { ShadowRootPortal } from "./shadow-portal";
+import tailwindStyles from "~/assets/main.css?inline";
+import { injectStyles } from "@/lib/utils";
 
 interface TweetInfo {
   element: Element;
@@ -111,6 +112,9 @@ const TweetButtonInjector = ({
 
     return () => observer.disconnect();
   }, [isSignedId]);
+  // useEffect(() => {
+  //   injectStyles(tailwindStyles);
+  // }, []);
 
   return (
     <>

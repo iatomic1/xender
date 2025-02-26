@@ -2,6 +2,8 @@ import { createPortal } from "react-dom";
 import LeaderboardSheet from "./leaderboard-sheet";
 import { useEffect, useState } from "react";
 import TweetButtonInjector from "./tweet-button-injector";
+import tailwindStyles from "~/assets/main.css?inline";
+import { injectStyles } from "@/lib/utils";
 
 export default function X({
   address,
@@ -16,6 +18,7 @@ export default function X({
     useState<HTMLElement | null>(null);
 
   useEffect(() => {
+    injectStyles(tailwindStyles);
     const observer = new MutationObserver(() => {
       const target = document.querySelector(
         'a[aria-label="Post"][data-testid="SideNav_NewTweet_Button"][href="/compose/post"]',

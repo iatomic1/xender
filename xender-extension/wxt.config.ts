@@ -8,6 +8,11 @@ export default defineConfig({
     name: "Xender",
     description: "__MSG_extDescription__",
     default_locale: "en",
+    host_permissions: [
+      "https://x.com/*",
+      "http://localhost:3000/*",
+      "https://discord.com/*",
+    ],
     web_accessible_resources: [
       {
         resources: ["example-main-world.js", "transactions.js", "connect.js"],
