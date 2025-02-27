@@ -1,9 +1,9 @@
-// tweet-injector.tsx
 import TipBtn from "@/components/tip-button";
+import { Button } from "@/components/ui/button";
+import { XendCart, CartManager } from "@/lib/storage";
+import { PlusCircle } from "lucide-react"; // Import MinusCircle for the minus icon
 import { useEffect, useState, useRef } from "react";
 import ReactDOM from "react-dom";
-import tailwindStyles from "~/assets/main.css?inline";
-import { injectStyles } from "@/lib/utils";
 
 interface TweetInfo {
   element: Element;
@@ -23,9 +23,27 @@ const TweetButtonInjector = ({
 }) => {
   const [, forceUpdate] = useState({});
   const tweetsRef = useRef<Map<Element, TweetInfo>>(new Map());
+  const [cartItems, setCartItems] = useState<XendCart[]>([]); // State to track cart items
+
+  // Fetch cart items on component mount
+  useEffect(() => {
+    const fetchCart = async () => {
+      const cart = await CartManager.getCart();
+      setCartItems(cart);
+    };
+    fetchCart();
+  }, []);
+
+  // Watch for changes in the cart
+  useEffect(() => {
+    const unsubscribe = CartManager.watchCart((newCart) => {
+      setCartItems(newCart);
+    });
+    return () => unsubscribe();
+  }, []);
+
   const cleanDisplayName = (text: string): string => {
     const allowedCharactersRegex = /[^a-zA-Z\-_.]/g;
-
     return text.replace(allowedCharactersRegex, "");
   };
 
@@ -33,8 +51,21 @@ const TweetButtonInjector = ({
     const validSuffixes = [".btc", ".stx", ".id"];
     return validSuffixes.some((suffix) => text.endsWith(suffix));
   };
+
   const getUsernameFromUrl = (url: string): string => {
     return url.replace(/^https?:\/\/(www\.)?x\.com\//, "");
+  };
+
+  // Handle adding/removing items from the cart
+  const handleCartToggle = async (bns: string, xUsername: string) => {
+    const { inCart, cart } = await CartManager.toggleCartItem(bns, xUsername);
+    setCartItems(cart); // Update local state
+    console.log(inCart ? "Added to cart" : "Removed from cart");
+  };
+
+  // Check if an item is in the cart
+  const isItemInCart = (bns: string): boolean => {
+    return cartItems.some((item) => item.bns === bns);
   };
 
   useEffect(() => {
@@ -66,14 +97,7 @@ const TweetButtonInjector = ({
                   );
 
                   const tweetActions = tweet.querySelector('[role="group"]');
-                  // const lol = tweet.querySelectorAll("img");
-                  // const avatarDiv = tweet.querySelector(
-                  //   'div[data-testid^="UserAvatar-Container"]',
-                  // );
-                  // const aTag = avatarDiv?.querySelector("a");
-                  // const img = aTag?.querySelector("img");
-                  // console.log(avatarDiv, aTag, img);
-                  // console.log(lol);
+
                   if (
                     tweetActions &&
                     !tweetActions.querySelector(".tip-button-placeholder")
@@ -112,9 +136,6 @@ const TweetButtonInjector = ({
 
     return () => observer.disconnect();
   }, [isSignedId]);
-  // useEffect(() => {
-  //   injectStyles(tailwindStyles);
-  // }, []);
 
   return (
     <>
@@ -122,15 +143,33 @@ const TweetButtonInjector = ({
         ([tweet, tweetInfo], index) => {
           const tweetActions = tweet.querySelector('[role="group"]');
           if (tweetActions && !tweetActions.querySelector(".injected-button")) {
+            const isInCart = isItemInCart(tweetInfo.username); // Check if the item is in the cart
+
             return ReactDOM.createPortal(
-              <TipBtn
-                key={index}
-                username={tweetInfo.username}
-                balance={balance}
-                connectedStxAddr={stxAddr}
-                receiverXUsername={tweetInfo.receiverXUsername}
-                senderXUsername="iatomic_1"
-              />,
+              <>
+                <TipBtn
+                  key={index}
+                  username={tweetInfo.username}
+                  balance={balance}
+                  connectedStxAddr={stxAddr}
+                  receiverXUsername={tweetInfo.receiverXUsername}
+                  senderXUsername="iatomic_1"
+                />
+                {!isInCart && (
+                  <Button
+                    size={"icon"}
+                    className="ml-2"
+                    onClick={() =>
+                      handleCartToggle(
+                        tweetInfo.username,
+                        tweetInfo.receiverXUsername,
+                      )
+                    }
+                  >
+                    <PlusCircle size={17} strokeWidth={1.25} />
+                  </Button>
+                )}
+              </>,
               tweetActions,
             );
           }

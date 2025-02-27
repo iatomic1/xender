@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import TweetButtonInjector from "./tweet-button-injector";
 import tailwindStyles from "~/assets/main.css?inline";
 import { injectStyles } from "@/lib/utils";
+import CartSheet from "./cart-sheet";
 
 export default function X({
   address,
@@ -39,7 +40,13 @@ export default function X({
   return (
     <>
       {leaderboardTargetEl &&
-        createPortal(<LeaderboardSheet />, leaderboardTargetEl)}
+        createPortal(
+          <div className="flex flex-col">
+            <LeaderboardSheet />
+            <CartSheet />
+          </div>,
+          leaderboardTargetEl,
+        )}
       <TweetButtonInjector
         stxAddr={address as string}
         balance={balance}
