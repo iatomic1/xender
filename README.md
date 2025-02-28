@@ -3,7 +3,7 @@
 
 # Xender
 
-Xender is a Chrome extension that allows users to tip their favorite creators on X using Stacks (STX). It works by injecting a button into tweets if the person's display name is a valid BNS (e.g., `atomic.btc`, `flames.stx`). Xender supports tipping with whitelisted tokens like MEME, VELAR, and more. Currently, it supports X, with Discord support and a leaderboard in development.
+Xender is a Chrome extension that allows users to tip their favorite creators on X using Stacks (STX). It works by injecting a button into tweets if the person's display name is a valid BNS (e.g., `iatomic.btc`, `muneeb.stx`). Xender supports tipping with whitelisted tokens like MEME, VELAR, and more. Currently, it supports X, with Discord support and a leaderboard in development.
 
 ## Demo
 https://github.com/user-attachments/assets/241cacba-f635-4f48-a3e1-f72efb31140a
