@@ -1,4 +1,5 @@
 import { SUPPORTED_TOKENS } from "@/lib/constants";
+import { addToCVValues, getPartsFromRows, nonEmptyPart } from "@/lib/tx";
 import { websiteMessenger } from "@/lib/window-messaging";
 import {
   openContractCall,
@@ -14,7 +15,13 @@ import {
   uintCV,
   principalCV,
   PostConditionMode,
+  FungibleConditionCode,
+  bufferCVFromString,
+  listCV,
+  tupleCV,
+  ContractCallOptions,
 } from "@stacks/transactions";
+import { toast } from "sonner";
 
 const appConfig = new AppConfig(["store_write", "publish_data"]);
 const userSession = new UserSession({ appConfig });
@@ -79,6 +86,57 @@ export default defineUnlistedScript(async () => {
     });
   });
 
+  websiteMessenger.onMessage("tipUsers", async (message) => {
+    const { rows, currency, senderAddy, senderXProfile } = message.data;
+
+    const { parts, total } = getPartsFromRows(rows);
+    const updatedParts = await addToCVValues(parts);
+    const nonEmptyParts = updatedParts.filter(nonEmptyPart);
+
+    const transactionPromise = new Promise((resolve, reject) => {
+      openContractCall({
+        contractAddress: "SP3FBR2AGK5H9QBDH3EEN6DF8EK8JY7RX8QJ5SVTE",
+        contractName: "send-many",
+        functionName: "send-many",
+        functionArgs: [
+          listCV(
+            nonEmptyParts.map((p) =>
+              tupleCV({
+                to: p.toCV!,
+                ustx: uintCV(p.ustx),
+              }),
+            ),
+          ),
+        ],
+        postConditions: [Pc.principal(senderAddy).willSendEq(total).ustx()],
+        userSession,
+        network: "mainnet",
+        postConditionMode: PostConditionMode.Deny,
+        onFinish: (data) => {
+          console.log(data);
+          resolve({
+            txId: data.txId,
+            currency,
+            senderAddy,
+            senderXProfile,
+            rows,
+          });
+        },
+        onCancel: () => {
+          reject(new Error("Transaction cancelled by user"));
+        },
+      });
+    });
+
+    try {
+      const result = await transactionPromise;
+      return result;
+    } catch (error) {
+      console.error("Transaction failed:", error);
+      throw error;
+    }
+  });
+
   websiteMessenger.onMessage("tipUser", async (message) => {
     const {
       address,
@@ -103,6 +161,7 @@ export default defineUnlistedScript(async () => {
             name: "Xender",
             icon: "/icon.png",
           },
+
           onFinish: (data) => {
             resolve({
               txId: data.txId,

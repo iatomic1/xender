@@ -43,7 +43,7 @@ export default function X({
         createPortal(
           <div className="flex flex-col">
             <LeaderboardSheet />
-            <CartSheet />
+            <CartSheet balance={balance} address={address as string} />
           </div>,
           leaderboardTargetEl,
         )}

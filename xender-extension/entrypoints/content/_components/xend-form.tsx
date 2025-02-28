@@ -21,13 +21,13 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { useMemo, useState } from "react";
-import { useEffect } from "react";
+import { useState, useEffect } from "react";
 import { EXPLORER_BASE_URL, SUPPORTED_TOKENS } from "@/lib/constants";
 import { websiteMessenger } from "@/lib/window-messaging";
 import { toast } from "sonner";
 import { truncateStr } from "@/lib/helpers";
 import { Loader } from "lucide-react";
+import { useTokenBalance } from "@/hooks/useTokenBalance";
 
 type StxSbtcFormProps = {
   isApiCallComplete: boolean;
@@ -40,62 +40,13 @@ type StxSbtcFormProps = {
   senderXUsername: string;
 };
 
-const formSchema = z.object({
-  currency: z.string(),
-  amount: z
-    .string()
-    .refine(
-      (val) => !isNaN(Number.parseFloat(val)) && Number.parseFloat(val) > 0,
-      {
-        message: "Amount must be a positive number",
-      },
-    ),
-});
-
-const formatBalance = (balance: string, currency: string) => {
-  const num = parseInt(balance, 10);
-  if (isNaN(num)) return "0";
-
-  const divisor = 1_000_000;
-  return (num / divisor).toLocaleString(undefined, {
-    maximumFractionDigits: 6,
-  });
-};
-
-// Helper function to get the raw balance as a number
-const getRawBalance = (
-  balance: any,
-  currency: string,
-  SUPPORTED_TOKENS: Record<string, string>,
-) => {
-  if (!balance) return 0;
-
-  if (currency === "STX" && balance.stx) {
-    return parseInt(balance.stx.balance, 10) / 1000000;
-  } else if (currency === "sBTC") {
-    // If you have sBTC balance, add it here
-    return 0;
-  } else if (currency === "MEME" && balance.fungible_tokens) {
-    const memeKey = `${SUPPORTED_TOKENS.MEME}::MEME`;
-    return balance.fungible_tokens[memeKey]?.balance
-      ? parseInt(balance.fungible_tokens[memeKey].balance, 10) / 1000000 // Assuming MEME has 6 decimals like STX
-      : 0;
-  } else if (currency === "VELAR" && balance.fungible_tokens) {
-    const velarKey = `${SUPPORTED_TOKENS.VELAR}::velar`;
-    return balance.fungible_tokens[velarKey]?.balance
-      ? parseInt(balance.fungible_tokens[velarKey].balance, 10) / 1000000 // Assuming VELAR has 6 decimals like STX
-      : 0;
-  }
-
-  return 0;
-};
-
 const baseFormSchema = z.object({
   currency: z.string(),
   amount: z.string(),
 });
 
 type FormValues = z.infer<typeof baseFormSchema>;
+
 export default function XendForm({
   isApiCallComplete,
   receiverStxAddr,
@@ -107,6 +58,13 @@ export default function XendForm({
   senderXUsername,
 }: StxSbtcFormProps) {
   const [isLoading, setIsLoading] = useState(false);
+
+  // Use our custom hook
+  const { availableTokens, tokenBalances, validateAmount } = useTokenBalance(
+    balance,
+    SUPPORTED_TOKENS,
+  );
+
   const form = useForm<FormValues>({
     resolver: zodResolver(
       baseFormSchema.refine(
@@ -132,55 +90,11 @@ export default function XendForm({
     name: "currency",
   });
 
-  // Get the available currencies based on balance
-  const availableTokens = useMemo(() => {
-    const tokens: Record<string, boolean> = {
-      STX: true,
-      sBTC: true, // Assuming sBTC is always available, update if needed
-    };
-
-    if (balance?.fungible_tokens) {
-      // Check MEME availability
-      const memeKey = `${SUPPORTED_TOKENS.MEME}::MEME`;
-      tokens.MEME =
-        !!balance.fungible_tokens[memeKey]?.balance &&
-        parseInt(balance.fungible_tokens[memeKey].balance, 10) > 0;
-
-      // Check VELAR availability
-      const velarKey = `${SUPPORTED_TOKENS.VELAR}::velar`;
-      tokens.VELAR =
-        !!balance.fungible_tokens[velarKey]?.balance &&
-        parseInt(balance.fungible_tokens[velarKey].balance, 10) > 0;
-    }
-
-    return tokens;
-  }, [balance]);
-
   // Get current balance based on selected currency
-  const currentBalance = useMemo(() => {
-    if (!balance) return "0";
+  const currentBalance =
+    tokenBalances[selectedCurrency]?.formattedBalance || "0";
 
-    if (selectedCurrency === "STX" && balance.stx) {
-      return formatBalance(balance.stx.balance, "STX");
-    } else if (selectedCurrency === "sBTC") {
-      // If you have sBTC balance, add it here
-      return "0";
-    } else if (selectedCurrency === "MEME" && balance.fungible_tokens) {
-      const memeKey = `${SUPPORTED_TOKENS.MEME}::MEME`;
-      return balance.fungible_tokens[memeKey]?.balance
-        ? formatBalance(balance.fungible_tokens[memeKey].balance, "MEME")
-        : "0";
-    } else if (selectedCurrency === "VELAR" && balance.fungible_tokens) {
-      const velarKey = `${SUPPORTED_TOKENS.VELAR}::velar`;
-      return balance.fungible_tokens[velarKey]?.balance
-        ? formatBalance(balance.fungible_tokens[velarKey].balance, "VELAR")
-        : "0";
-    }
-
-    return "0";
-  }, [selectedCurrency, balance]);
-
-  async function onSubmit(values: z.infer<typeof formSchema>) {
+  async function onSubmit(values: FormValues) {
     if (isApiCallComplete && receiverStxAddr) {
       try {
         setIsLoading(true);
@@ -213,8 +127,6 @@ export default function XendForm({
           toast.error("Tx failed");
         }
 
-        console.log(res, "from xend");
-
         setOpen(false);
       } catch (err) {
         console.error(err);
@@ -227,16 +139,15 @@ export default function XendForm({
     }
   }
 
-  const rawBalance = useMemo(
-    () => getRawBalance(balance, selectedCurrency, SUPPORTED_TOKENS),
-    [balance, selectedCurrency],
-  );
-
   useEffect(() => {
     const subscription = form.watch((value, { name }) => {
       if (name === "amount" || name === "currency") {
-        const amount = Number.parseFloat(value.amount || "0");
-        if (!isNaN(amount) && amount > rawBalance) {
+        const isValid = validateAmount(
+          value.amount || "0",
+          value.currency || "STX",
+        );
+
+        if (!isValid && value.amount && Number.parseFloat(value.amount) > 0) {
           form.setError("amount", {
             type: "manual",
             message: "Amount exceeds your balance",
@@ -248,7 +159,7 @@ export default function XendForm({
     });
 
     return () => subscription.unsubscribe();
-  }, [form, rawBalance]);
+  }, [form, validateAmount]);
 
   return (
     <Form {...form}>
