@@ -1,14 +1,12 @@
-// cart-storage.ts
 import { storage } from "wxt/storage";
 
-// Define the cart item interface
 export type XendCart = {
   bns: string;
   createdAt: string;
   xUsername: string;
+  ownerAddress?: string;
 };
 
-// Define our cart storage
 export const xendCart = storage.defineItem<XendCart[]>("local:xendCart", {
   fallback: [],
   version: 1,
@@ -24,9 +22,12 @@ export const CartManager = {
     return cart.some((item) => item.bns === bns);
   },
 
-  async addToCart(bns: string, xUsername: string): Promise<XendCart[]> {
+  async addToCart(
+    bns: string,
+    xUsername: string,
+    ownerAddress?: string,
+  ): Promise<XendCart[]> {
     const cart = await this.getCart();
-
     if (cart.some((item) => item.bns === bns)) {
       return cart;
     }
@@ -35,6 +36,7 @@ export const CartManager = {
       bns,
       createdAt: new Date().toISOString(),
       xUsername,
+      ownerAddress,
     };
 
     const updatedCart = [...cart, newItem];
@@ -45,7 +47,6 @@ export const CartManager = {
   async removeFromCart(bns: string): Promise<XendCart[]> {
     const cart = await this.getCart();
     const updatedCart = cart.filter((item) => item.bns !== bns);
-
     await xendCart.setValue(updatedCart);
     return updatedCart;
   },
@@ -53,14 +54,14 @@ export const CartManager = {
   async toggleCartItem(
     bns: string,
     xUsername: string,
+    ownerAddress?: string,
   ): Promise<{ inCart: boolean; cart: XendCart[] }> {
     const isInCart = await this.isInCart(bns);
-
     if (isInCart) {
       const cart = await this.removeFromCart(bns);
       return { inCart: false, cart };
     } else {
-      const cart = await this.addToCart(bns, xUsername);
+      const cart = await this.addToCart(bns, xUsername, ownerAddress);
       return { inCart: true, cart };
     }
   },

@@ -1,9 +1,11 @@
 import TipBtn from "@/components/tip-button";
 import { Button } from "@/components/ui/button";
 import { XendCart, CartManager } from "@/lib/storage";
-import { PlusCircle } from "lucide-react"; // Import MinusCircle for the minus icon
+import { getOwner } from "bns-v2-sdk";
+import { PlusCircle, Trash2 } from "lucide-react";
 import { useEffect, useState, useRef } from "react";
 import ReactDOM from "react-dom";
+import { toast } from "sonner";
 
 interface TweetInfo {
   element: Element;
@@ -23,9 +25,9 @@ const TweetButtonInjector = ({
 }) => {
   const [, forceUpdate] = useState({});
   const tweetsRef = useRef<Map<Element, TweetInfo>>(new Map());
-  const [cartItems, setCartItems] = useState<XendCart[]>([]); // State to track cart items
+  const [cartItems, setCartItems] = useState<XendCart[]>([]);
+  const [loading, setLoading] = useState<Record<string, boolean>>({});
 
-  // Fetch cart items on component mount
   useEffect(() => {
     const fetchCart = async () => {
       const cart = await CartManager.getCart();
@@ -34,7 +36,6 @@ const TweetButtonInjector = ({
     fetchCart();
   }, []);
 
-  // Watch for changes in the cart
   useEffect(() => {
     const unsubscribe = CartManager.watchCart((newCart) => {
       setCartItems(newCart);
@@ -56,11 +57,43 @@ const TweetButtonInjector = ({
     return url.replace(/^https?:\/\/(www\.)?x\.com\//, "");
   };
 
-  // Handle adding/removing items from the cart
   const handleCartToggle = async (bns: string, xUsername: string) => {
-    const { inCart, cart } = await CartManager.toggleCartItem(bns, xUsername);
-    setCartItems(cart); // Update local state
-    console.log(inCart ? "Added to cart" : "Removed from cart");
+    try {
+      setLoading((prev) => ({ ...prev, [bns]: true }));
+
+      const isInCart = await CartManager.isInCart(bns);
+
+      if (isInCart) {
+        const { cart } = await CartManager.toggleCartItem(bns, xUsername);
+        setCartItems(cart);
+      } else {
+        try {
+          const owner = await getOwner({
+            fullyQualifiedName: bns,
+            network: "mainnet",
+          });
+
+          if (owner) {
+            const { cart } = await CartManager.toggleCartItem(
+              bns,
+              xUsername,
+              owner,
+            );
+            setCartItems(cart);
+          } else {
+            // No owner found
+            toast("Invalid BNS", {
+              description: `${bns} does not have a valid owner on the Stacks network.`,
+            });
+          }
+        } catch (error) {
+          console.error("Error validating BNS:", error);
+        }
+      }
+    } finally {
+      // Clear loading state
+      setLoading((prev) => ({ ...prev, [bns]: false }));
+    }
   };
 
   // Check if an item is in the cart
@@ -143,7 +176,8 @@ const TweetButtonInjector = ({
         ([tweet, tweetInfo], index) => {
           const tweetActions = tweet.querySelector('[role="group"]');
           if (tweetActions && !tweetActions.querySelector(".injected-button")) {
-            const isInCart = isItemInCart(tweetInfo.username); // Check if the item is in the cart
+            const isInCart = isItemInCart(tweetInfo.username);
+            const isLoading = loading[tweetInfo.username] || false;
 
             return ReactDOM.createPortal(
               <>
@@ -159,6 +193,7 @@ const TweetButtonInjector = ({
                   <Button
                     size={"icon"}
                     className="ml-2"
+                    disabled={isLoading}
                     onClick={() =>
                       handleCartToggle(
                         tweetInfo.username,
@@ -166,7 +201,13 @@ const TweetButtonInjector = ({
                       )
                     }
                   >
-                    <PlusCircle size={17} strokeWidth={1.25} />
+                    {isLoading ? (
+                      <span className="animate-spin">⏳</span>
+                    ) : isInCart ? (
+                      <Trash2 size={17} strokeWidth={1.25} />
+                    ) : (
+                      <PlusCircle size={17} strokeWidth={1.25} />
+                    )}
                   </Button>
                 )}
               </>,
