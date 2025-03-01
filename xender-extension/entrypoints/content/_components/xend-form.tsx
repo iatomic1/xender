@@ -28,6 +28,7 @@ import { toast } from "sonner";
 import { Loader } from "lucide-react";
 import { useTokenBalance } from "@/hooks/useTokenBalance";
 import { truncateStr } from "@/utils/str-helpers";
+import { getStacksData } from "@/entrypoints/queries/stacks";
 
 type StxSbtcFormProps = {
   isApiCallComplete: boolean;
@@ -58,6 +59,7 @@ export default function XendForm({
   senderXUsername,
 }: StxSbtcFormProps) {
   const [isLoading, setIsLoading] = useState(false);
+  const [stacksPriceUsd, setStacksPriceUsd] = useState<string | null>(null);
 
   // Use our custom hook
   const { availableTokens, tokenBalances, validateAmount } = useTokenBalance(
@@ -90,9 +92,35 @@ export default function XendForm({
     name: "currency",
   });
 
+  // Watch the amount field to update the USD value
+  const amount = useWatch({
+    control: form.control,
+    name: "amount",
+  });
+
   // Get current balance based on selected currency
   const currentBalance =
     tokenBalances[selectedCurrency]?.formattedBalance || "0";
+
+  // Fetch STX price in USD
+  useEffect(() => {
+    const fetchStacksPrice = async () => {
+      const stacksData = await getStacksData();
+      if (stacksData) {
+        setStacksPriceUsd(stacksData.data.priceUsd);
+      }
+    };
+
+    fetchStacksPrice();
+  }, []);
+
+  // Calculate USD value of the entered STX amount
+  const usdValue =
+    stacksPriceUsd && selectedCurrency === "STX" && amount
+      ? (Number.parseFloat(amount) * Number.parseFloat(stacksPriceUsd)).toFixed(
+          2,
+        )
+      : null;
 
   async function onSubmit(values: FormValues) {
     if (isApiCallComplete && receiverStxAddr) {
@@ -212,8 +240,28 @@ export default function XendForm({
                 </small>
               </div>
               <FormControl>
-                <Input placeholder="Enter amount" {...field} />
+                <div className="relative">
+                  <Input
+                    placeholder="Enter amount"
+                    {...field}
+                    // rightElement={
+                    //   selectedCurrency === "STX" && usdValue ? (
+                    //     <span className="text-sm text-muted-foreground">
+                    //       ≈ ${usdValue}
+                    //     </span>
+                    //   ) : null
+                    // }
+                  />
+                  <div className="absolute top-2 right-2">
+                    {selectedCurrency === "STX" && usdValue && (
+                      <span className="text-sm text-muted-foreground ab">
+                        $ {usdValue}
+                      </span>
+                    )}
+                  </div>
+                </div>
               </FormControl>
+
               <FormMessage />
             </FormItem>
           )}
