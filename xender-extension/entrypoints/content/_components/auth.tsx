@@ -1,5 +1,5 @@
 import { Button } from "@/components/ui/button";
-import { websiteMessenger } from "@/lib/window-messaging";
+import { messenger } from "@/lib/messaging";
 import { Unplug, Wallet2 } from "lucide-react";
 
 export default function Auth({
@@ -16,10 +16,9 @@ export default function Auth({
       className="fixed top-1 right-3 gap-3"
       onClick={async () => {
         if (isSignedIn) {
-          websiteMessenger.sendMessage("disconnectWallet", null);
+          messenger.sendMessage("disconnectWallet", null);
         } else {
-          websiteMessenger.sendMessage("connectWallet", null);
-          // window.postMessage({ type: "CONNECT_WALLET" }, "*");
+          messenger.sendMessage("connectWallet", null);
         }
       }}
     >

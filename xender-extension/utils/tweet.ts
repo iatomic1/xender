@@ -11,12 +11,3 @@ export const hasValidSuffix = (text: string): boolean => {
 export const getUsernameFromUrl = (url: string): string => {
   return url.replace(/^https?:\/\/(www\.)?x\.com\//, "");
 };
-
-export const truncateStr = (
-  str: string,
-  startChars: number = 5,
-  endChars: number = 1,
-): string => {
-  if (str.length <= startChars + endChars) return str;
-  return str.slice(0, startChars) + "..." + str.slice(-endChars);
-};

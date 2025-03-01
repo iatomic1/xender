@@ -1,8 +1,8 @@
-import { websiteMessenger } from "@/lib/window-messaging";
+import { messenger } from "@/lib/messaging";
 import { openSTXTransfer } from "@stacks/connect";
 
 export default defineUnlistedScript(async () => {
-  websiteMessenger.onMessage("tipUser", async (message) => {
+  messenger.onMessage("tipUser", async (message) => {
     console.log("fired");
     const {
       address,

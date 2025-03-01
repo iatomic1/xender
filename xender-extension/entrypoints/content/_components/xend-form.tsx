@@ -23,11 +23,11 @@ import {
 } from "@/components/ui/select";
 import { useState, useEffect } from "react";
 import { EXPLORER_BASE_URL, SUPPORTED_TOKENS } from "@/lib/constants";
-import { websiteMessenger } from "@/lib/window-messaging";
+import { messenger } from "@/lib/messaging";
 import { toast } from "sonner";
-import { truncateStr } from "@/lib/helpers";
 import { Loader } from "lucide-react";
 import { useTokenBalance } from "@/hooks/useTokenBalance";
+import { truncateStr } from "@/utils/str-helpers";
 
 type StxSbtcFormProps = {
   isApiCallComplete: boolean;
@@ -98,7 +98,7 @@ export default function XendForm({
     if (isApiCallComplete && receiverStxAddr) {
       try {
         setIsLoading(true);
-        const res = await websiteMessenger.sendMessage("tipUser", {
+        const res = await messenger.sendMessage("tipUser", {
           address: receiverStxAddr,
           amount: Number.parseFloat(values.amount),
           currency: values.currency,

@@ -36,9 +36,9 @@ import { Loader } from "lucide-react";
 import { XendCart } from "@/lib/storage";
 import { EXPLORER_BASE_URL, SUPPORTED_TOKENS } from "@/lib/constants";
 import { useTokenBalance } from "@/hooks/useTokenBalance"; // Import our hook
-import { websiteMessenger } from "@/lib/window-messaging";
-import { Row } from "@/lib/tx";
-import { truncateStr } from "@/lib/helpers";
+import { messenger } from "@/lib/messaging";
+import { Row } from "@/utils/tx";
+import { truncateStr } from "@/utils/str-helpers";
 
 const formSchema = z.object({
   currency: z.string(),
@@ -115,7 +115,7 @@ export default function XendMany({
       memo: "",
     }));
 
-    const res = await websiteMessenger.sendMessage("tipUsers", {
+    const res = await messenger.sendMessage("tipUsers", {
       rows: rows,
       currency: values.currency,
       senderAddy: address,

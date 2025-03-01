@@ -1,4 +1,4 @@
-import { websiteMessenger } from "@/lib/window-messaging";
+import { messenger } from "@/lib/messaging";
 import { showConnect } from "@stacks/connect";
 import { AppConfig, UserSession } from "@stacks/connect";
 
@@ -15,7 +15,7 @@ export default defineUnlistedScript(async () => {
       try {
         const userData = userSession.loadUserData();
         console.log("User data loaded:", userData);
-        websiteMessenger.sendMessage("userSession", {
+        messenger.sendMessage("userSession", {
           input: {
             isSignedIn: true,
             userData: userData,
@@ -23,7 +23,7 @@ export default defineUnlistedScript(async () => {
         });
       } catch (error) {
         console.error("Failed to load user data:", error);
-        websiteMessenger.sendMessage("userSession", {
+        messenger.sendMessage("userSession", {
           input: {
             isSignedIn: false,
             userData: null,
@@ -31,7 +31,7 @@ export default defineUnlistedScript(async () => {
         });
       }
     } else {
-      websiteMessenger.sendMessage("userSession", {
+      messenger.sendMessage("userSession", {
         input: {
           isSignedIn: false,
           userData: null,
@@ -40,12 +40,12 @@ export default defineUnlistedScript(async () => {
     }
   };
 
-  websiteMessenger.onMessage("disconnectWallet", () => {
+  messenger.onMessage("disconnectWallet", () => {
     userSession.signUserOut();
     handleUserSession();
   });
 
-  websiteMessenger.onMessage("connectWallet", () => {
+  messenger.onMessage("connectWallet", () => {
     console.log("Connect wallet button clicked");
     const myAppName = "Xender";
 
