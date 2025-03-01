@@ -1,5 +1,3 @@
-import "../assets/main.css";
-import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
 import { getOwner } from "bns-v2-sdk";
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
@@ -30,7 +28,6 @@ const TipBtn: React.FC<MiniButtonProps> = ({
   balance,
   receiverXUsername,
   senderXUsername,
-  ...props
 }) => {
   const [isLoading, setIsLoading] = useState(false);
   const [open, setOpen] = useState(false);

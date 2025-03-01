@@ -1,6 +1,6 @@
 import { SUPPORTED_TOKENS } from "@/lib/constants";
-import { addToCVValues, getPartsFromRows, nonEmptyPart } from "@/lib/tx";
-import { websiteMessenger } from "@/lib/window-messaging";
+import { addToCVValues, getPartsFromRows, nonEmptyPart } from "@/utils/tx";
+import { messenger } from "@/lib/messaging";
 import {
   openContractCall,
   openSTXTransfer,
@@ -37,7 +37,7 @@ export default defineUnlistedScript(async () => {
       try {
         const userData = userSession.loadUserData();
         console.log("User data loaded:", userData);
-        websiteMessenger.sendMessage("userSession", {
+        messenger.sendMessage("userSession", {
           input: {
             isSignedIn: true,
             userData: userData,
@@ -45,7 +45,7 @@ export default defineUnlistedScript(async () => {
         });
       } catch (error) {
         console.error("Failed to load user data:", error);
-        websiteMessenger.sendMessage("userSession", {
+        messenger.sendMessage("userSession", {
           input: {
             isSignedIn: false,
             userData: null,
@@ -53,7 +53,7 @@ export default defineUnlistedScript(async () => {
         });
       }
     } else {
-      websiteMessenger.sendMessage("userSession", {
+      messenger.sendMessage("userSession", {
         input: {
           isSignedIn: false,
           userData: null,
@@ -62,12 +62,12 @@ export default defineUnlistedScript(async () => {
     }
   };
 
-  websiteMessenger.onMessage("disconnectWallet", () => {
+  messenger.onMessage("disconnectWallet", () => {
     userSession.signUserOut();
     handleUserSession();
   });
 
-  websiteMessenger.onMessage("connectWallet", () => {
+  messenger.onMessage("connectWallet", () => {
     console.log("Connect wallet button clicked");
     const myAppName = "Xender";
 
@@ -86,7 +86,7 @@ export default defineUnlistedScript(async () => {
     });
   });
 
-  websiteMessenger.onMessage("tipUsers", async (message) => {
+  messenger.onMessage("tipUsers", async (message) => {
     const { rows, currency, senderAddy, senderXProfile } = message.data;
 
     const { parts, total } = getPartsFromRows(rows);
@@ -137,7 +137,7 @@ export default defineUnlistedScript(async () => {
     }
   });
 
-  websiteMessenger.onMessage("tipUser", async (message) => {
+  messenger.onMessage("tipUser", async (message) => {
     const {
       address,
       amount,
