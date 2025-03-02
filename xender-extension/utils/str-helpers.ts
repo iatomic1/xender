@@ -1,13 +1,13 @@
-export const cleanDisplayName = (text: string): string => {
-  const allowedCharactersRegex = /[^a-zA-Z\-_.]/g;
-  return text.replace(allowedCharactersRegex, "");
-};
-
-export const hasValidSuffix = (text: string): boolean => {
-  const validSuffixes = [".btc", ".stx", ".id"];
-  return validSuffixes.some((suffix) => text.endsWith(suffix));
-};
-
+// export const cleanDisplayName = (text: string): string => {
+//   const allowedCharactersRegex = /[^a-zA-Z\-_.]/g;
+//   return text.replace(allowedCharactersRegex, "");
+// };
+//
+// export const hasValidSuffix = (text: string): boolean => {
+//   const validSuffixes = [".btc", ".stx", ".id"];
+//   return validSuffixes.some((suffix) => text.endsWith(suffix));
+// };
+//
 export const truncateStr = (
   str: string,
   startChars: number = 5,
