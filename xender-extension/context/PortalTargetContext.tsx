@@ -8,7 +8,6 @@ import { BalanceProvider } from "./BalanceContext";
 export const PortalContext = React.createContext<HTMLElement | null>(null);
 
 export const ContentRoot = () => {
-  const { theme, toggleTheme } = useTheme();
   const [portalContainer, setPortalContainer] = useState<HTMLElement | null>(
     null,
   );
@@ -18,11 +17,7 @@ export const ContentRoot = () => {
       <AuthProvider>
         <BalanceProvider>
           <PortalContext.Provider value={portalContainer}>
-            <div
-              ref={setPortalContainer}
-              id="command-portal-container"
-              className={theme}
-            >
+            <div ref={setPortalContainer} id="command-portal-container">
               {/* <Button */}
               {/*   onClick={() => { */}
               {/*     toast.success("Hello"); */}

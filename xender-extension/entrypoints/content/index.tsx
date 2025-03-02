@@ -23,6 +23,7 @@ export default defineContentScript({
         const app = document.createElement("div");
         app.id = "xender-root";
         container.append(app);
+        container.classList.add("dark");
         shadowRootContainer = container;
 
         document.head.querySelectorAll("style").forEach((styleEl) => {
@@ -33,7 +34,7 @@ export default defineContentScript({
 
         const root = ReactDOM.createRoot(app);
         return root.render(
-          <ThemeProvider>
+          <ThemeProvider defaultTheme="dark" storageKey="vite-ui-theeme">
             <Toaster position="top-right" richColors />
             <ContentRoot />
           </ThemeProvider>,

@@ -28,6 +28,7 @@ const TipBtn: React.FC<MiniButtonProps> = ({
   balance,
   receiverXUsername,
   senderXUsername,
+  ...props
 }) => {
   const [isLoading, setIsLoading] = useState(false);
   const [open, setOpen] = useState(false);
@@ -68,14 +69,14 @@ const TipBtn: React.FC<MiniButtonProps> = ({
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button size={"icon"}>
+        <Button size={"icon"} {...props}>
           {children || <Bitcoin size={17} strokeWidth={1.25} />}
         </Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-[425px]">
         <DialogTitle>Xend {username}</DialogTitle>
         <DialogHeader>
-          <DialogDescription>
+          <DialogDescription className="text-xs">
             {isLoading
               ? "Loading address..."
               : receiverStxAddr

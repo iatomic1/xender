@@ -1,6 +1,5 @@
 import { createPortal } from "react-dom";
 import { useEffect, useState } from "react";
-import { Button } from "@/components/ui/button";
 import { getOwner } from "bns-v2-sdk";
 import TipBtn from "@/components/tip-button";
 
@@ -19,6 +18,7 @@ export default function ProfileButtonInjector({
   const [bns, setBns] = useState<string | null>(null);
 
   useEffect(() => {
+    console.log("starting");
     const findProfileElement = async () => {
       const selectors = ['div[data-testid="UserName"]'];
 
@@ -73,11 +73,11 @@ export default function ProfileButtonInjector({
           attributeFilter: ["data-testid"],
         });
 
-        setTimeout(async () => {
-          if (await findProfileElement()) {
-            observer.disconnect();
-          }
-        }, 1500);
+        // setTimeout(async () => {
+        if (await findProfileElement()) {
+          observer.disconnect();
+        }
+        // }, 1500);
 
         return () => observer.disconnect();
       }

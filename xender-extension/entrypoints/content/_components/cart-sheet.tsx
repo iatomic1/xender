@@ -1,4 +1,4 @@
-import { LockOpen, Trash2 } from "lucide-react";
+import { LockOpen, ShoppingBag, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Sheet,
@@ -78,7 +78,7 @@ export default function CartSheet({
     <Sheet>
       <SheetTrigger asChild>
         <Button variant="secondary" size="icon" className="rounded-full mt-10">
-          <LockOpen size={17} />
+          <ShoppingBag size={17} />
         </Button>
       </SheetTrigger>
       <SheetContent

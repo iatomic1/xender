@@ -15,18 +15,39 @@ import {
   uintCV,
   principalCV,
   PostConditionMode,
-  FungibleConditionCode,
-  bufferCVFromString,
   listCV,
   tupleCV,
-  ContractCallOptions,
 } from "@stacks/transactions";
-import { toast } from "sonner";
 
-const appConfig = new AppConfig(["store_write", "publish_data"]);
-const userSession = new UserSession({ appConfig });
+function getLocalStoragePropertyDescriptor() {
+  const iframe = document.createElement("iframe");
+  document.head.append(iframe);
+  const pd = Object.getOwnPropertyDescriptor(
+    iframe.contentWindow,
+    "localStorage",
+  );
+  iframe.remove();
+  return pd;
+}
 
 export default defineUnlistedScript(async () => {
+  const localStorageDescriptor = getLocalStoragePropertyDescriptor();
+  if (localStorageDescriptor && localStorageDescriptor.get) {
+    const localStorage = localStorageDescriptor.get.call(window);
+    Object.defineProperty(window, "localStorage", {
+      value: localStorage,
+      writable: false,
+      configurable: false,
+    });
+  } else {
+    console.error(
+      "Failed to restore localStorage: Property descriptor not found.",
+    );
+  }
+
+  const appConfig = new AppConfig(["store_write", "publish_data"]);
+  const userSession = new UserSession({ appConfig });
+
   // Add a small delay to ensure React has mounted
   setTimeout(() => {
     handleUserSession();

@@ -214,7 +214,7 @@ export default function XendForm({
                     <SelectItem value="sBTC">sBTC</SelectItem>
                   </SelectGroup>
                   <SelectGroup>
-                    <SelectLabel>Tokens</SelectLabel>
+                    <SelectLabel>Supported Tokens</SelectLabel>
                     <SelectItem value="MEME" disabled={!availableTokens.MEME}>
                       MEME
                     </SelectItem>
